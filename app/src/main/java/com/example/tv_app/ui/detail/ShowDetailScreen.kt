@@ -132,6 +132,23 @@ private fun ShowDetailContent(show: Show) {
         item { Text(text = "Premiered: ${show.premiered ?: "Unknown"}") }
         item { Text(text = htmlToPlainText(show.summary)) }
 
+        if (!cast.isNullOrEmpty()) {
+            item {
+                Text(
+                    text = "Cast",
+                    style = MaterialTheme.typography.titleMedium,
+                    modifier = Modifier.padding(top = 8.dp)
+                )
+            }
+            item {
+                LazyRow(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                    items(cast, key = { it.person.id }) { credit ->
+                        CastMemberItem(credit)
+                    }
+                }
+            }
+        }
+
         if (!episodesBySeason.isNullOrEmpty()) {
             item {
                 Text(
@@ -149,23 +166,6 @@ private fun ShowDetailContent(show: Show) {
                 }
                 items(episodes, key = { it.id }) { episode ->
                     Text(text = "Ep ${episode.number ?: "-"}: ${episode.name}")
-                }
-            }
-        }
-
-        if (!cast.isNullOrEmpty()) {
-            item {
-                Text(
-                    text = "Cast",
-                    style = MaterialTheme.typography.titleMedium,
-                    modifier = Modifier.padding(top = 8.dp)
-                )
-            }
-            item {
-                LazyRow(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                    items(cast, key = { it.person.id }) { credit ->
-                        CastMemberItem(credit)
-                    }
                 }
             }
         }
