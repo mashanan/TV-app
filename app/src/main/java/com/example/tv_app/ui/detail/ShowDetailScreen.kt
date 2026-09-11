@@ -1,5 +1,7 @@
 package com.example.tv_app.ui.detail
 
+import android.content.Context
+import android.content.Intent
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -10,6 +12,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -24,6 +27,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -47,6 +51,7 @@ fun ShowDetailScreen(
     )
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val context = LocalContext.current
 
     Scaffold(
         modifier = modifier,
@@ -56,6 +61,14 @@ fun ShowDetailScreen(
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                    }
+                },
+                actions = {
+                    val state = uiState
+                    if (state is UiState.Success) {
+                        IconButton(onClick = { shareShow(context, state.data) }) {
+                            Icon(Icons.Filled.Share, contentDescription = "Share")
+                        }
                     }
                 }
             )
@@ -109,4 +122,20 @@ private fun ShowDetailContent(show: Show) {
         Text(text = "Premiered: ${show.premiered ?: "Unknown"}")
         Text(text = htmlToPlainText(show.summary))
     }
+}
+
+private fun shareShow(context: Context, show: Show) {
+    val shareText = buildString {
+        appendLine(show.name)
+        appendLine()
+        appendLine(htmlToPlainText(show.summary))
+        appendLine()
+        append(show.url.orEmpty())
+    }
+    val sendIntent = Intent(Intent.ACTION_SEND).apply {
+        type = "text/plain"
+        putExtra(Intent.EXTRA_SUBJECT, show.name)
+        putExtra(Intent.EXTRA_TEXT, shareText)
+    }
+    context.startActivity(Intent.createChooser(sendIntent, "Share via"))
 }
