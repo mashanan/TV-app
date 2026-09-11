@@ -5,11 +5,16 @@ import android.content.Intent
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Share
@@ -26,6 +31,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
@@ -34,6 +40,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import coil.compose.AsyncImage
+import com.example.tv_app.data.model.CastCredit
 import com.example.tv_app.data.model.Show
 import com.example.tv_app.ui.common.UiState
 import com.example.tv_app.util.htmlToPlainText
@@ -105,22 +112,90 @@ private fun ErrorContent(message: String, onRetry: () -> Unit) {
 
 @Composable
 private fun ShowDetailContent(show: Show) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .verticalScroll(rememberScrollState())
-            .padding(16.dp),
+    val episodesBySeason = show.embedded?.episodes?.groupBy { it.season }?.toSortedMap()
+    val cast = show.embedded?.cast
+
+    LazyColumn(
+        modifier = Modifier.fillMaxSize(),
+        contentPadding = PaddingValues(16.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
+        item {
+            AsyncImage(
+                model = show.image?.original,
+                contentDescription = show.name,
+                contentScale = ContentScale.Fit,
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
+        item { Text(text = show.name, style = MaterialTheme.typography.headlineSmall) }
+        item { Text(text = "Premiered: ${show.premiered ?: "Unknown"}") }
+        item { Text(text = htmlToPlainText(show.summary)) }
+
+        if (!episodesBySeason.isNullOrEmpty()) {
+            item {
+                Text(
+                    text = "Episodes",
+                    style = MaterialTheme.typography.titleMedium,
+                    modifier = Modifier.padding(top = 8.dp)
+                )
+            }
+            episodesBySeason.forEach { (season, episodes) ->
+                item {
+                    Text(
+                        text = "Season $season (${episodes.size} episodes)",
+                        style = MaterialTheme.typography.titleSmall
+                    )
+                }
+                items(episodes, key = { it.id }) { episode ->
+                    Text(text = "Ep ${episode.number ?: "-"}: ${episode.name}")
+                }
+            }
+        }
+
+        if (!cast.isNullOrEmpty()) {
+            item {
+                Text(
+                    text = "Cast",
+                    style = MaterialTheme.typography.titleMedium,
+                    modifier = Modifier.padding(top = 8.dp)
+                )
+            }
+            item {
+                LazyRow(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                    items(cast, key = { it.person.id }) { credit ->
+                        CastMemberItem(credit)
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun CastMemberItem(credit: CastCredit) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier.width(80.dp)
+    ) {
         AsyncImage(
-            model = show.image?.original,
-            contentDescription = show.name,
-            contentScale = ContentScale.Fit,
-            modifier = Modifier.fillMaxWidth()
+            model = credit.person.image?.medium,
+            contentDescription = credit.person.name,
+            contentScale = ContentScale.Crop,
+            modifier = Modifier
+                .size(64.dp)
+                .clip(RoundedCornerShape(32.dp))
         )
-        Text(text = show.name, style = MaterialTheme.typography.headlineSmall)
-        Text(text = "Premiered: ${show.premiered ?: "Unknown"}")
-        Text(text = htmlToPlainText(show.summary))
+        Text(
+            text = credit.person.name,
+            style = MaterialTheme.typography.labelSmall,
+            maxLines = 1
+        )
+        Text(
+            text = credit.character.name,
+            style = MaterialTheme.typography.labelSmall,
+            maxLines = 1
+        )
     }
 }
 
