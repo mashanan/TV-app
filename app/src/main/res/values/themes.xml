@@ -2,4 +2,10 @@
 <resources>
 
     <style name="Theme.TVapp" parent="android:Theme.Material.Light.NoActionBar" />
+
+    <style name="Theme.TVapp.Splash" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenBackground">#1D1B20</item>
+        <item name="windowSplashScreenAnimatedIcon">@android:color/transparent</item>
+        <item name="postSplashScreenTheme">@style/Theme.TVapp</item>
+    </style>
 </resources>
