@@ -1,6 +1,6 @@
 # TV App
 
-Aplikasi browser tontonan TV sederhana buat technical test Intern Mobile Engineer. 
+Aplikasi browser tontonan TV sederhana untuk technical test Intern Mobile Engineer. 
 Datanya diambil dari [TVMaze API](https://www.tvmaze.com/api) 
 ada halaman list show, detail show (poster, summary, tanggal tayang, plus bonus season/episode & cast), 
 serta share action dari halaman detail.
@@ -9,7 +9,7 @@ Di luar requirement utama, saya menambahkan splash screen, onboarding, dan login
 menggunakan Firebase Authentication (wajib verifikasi email dulu sebelum bisa masuk ke halaman utama)  
 untuk demo sudah saya buat videonya di link paling bawah file ini.
 
-## Cara Jalanin
+## Cara menjalankan apps
 
 1. Clone repo ini, buka pakai Android Studio (dites di Android Studio versi terbaru, minSdk 23, compileSdk/targetSdk 35).
 2. Kalau cuma mau coba fitur utamanya (browsing show — list & detail), langsung Run aja,
